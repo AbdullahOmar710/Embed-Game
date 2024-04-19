@@ -1,0 +1,5 @@
+For my 2nd year Final Year Project, I developed an open-world game on the ST Nucleo-L476RG development board, utilizing Mbed Studio for coding. The game is displayed on an 84x48 Nokia 5110 LCD, and incorporates various peripherals to enhance the user experience. These include a two-axis joystick for navigation, a DFPlayer module alongside a speaker for sound representation, and classic buttons on breadboards for additional input.
+
+The game combines exploration elements with a unique fighting mechanism and a lock-on system for encountering enemies. Each character (represented by different sprites) possesses distinct abilities, attacks, health, and stamina levels, catering to diverse player preferences. The characters not only offer varied gameplay mechanics but also visually distinct appearances, ensuring an engaging experience for all players.
+
+To streamline the development process and improve code organization, I incorporated object-oriented programming principles, utilizing classes, libraries, and functions. This approach facilitated testing, debugging, and code maintenance, resulting in a more robust and efficient codebase.
