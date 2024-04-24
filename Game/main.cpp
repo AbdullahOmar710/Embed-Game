@@ -4,8 +4,9 @@
 #include "Map.h"
 #include "Node.h"
 
-N5110 lcd(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10);
-Joystick joystick(PC_3, PC_2);
+N5110 lcd(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10); // LCD pins
+Joystick joystick(PC_3, PC_2); // Joystick pins
+InterruptIn joystick_button(PC_15); // joystick middle button 
 
 int main() {
     lcd.init(LPH7366_1);

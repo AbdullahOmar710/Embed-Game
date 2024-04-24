@@ -15,6 +15,8 @@ public:
 private:
     int width, height;
     std::vector<std::vector<Node>> grid;
+    bool isPathBorder(int y, int x); // Helper function to check for path borders
+
 };
 
 #endif
