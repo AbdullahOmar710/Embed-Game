@@ -12,6 +12,10 @@ public:
     int getWidth() const;
     int getHeight() const;
     int getPathCenterXAt(int y); // Method to find the center of the path at a specific height
+    // Method to check if a position is valid
+    bool isValidPosition(int x, int y);
+    bool isPath(int x, int y) const;
+
 
 private:
     int width, height;

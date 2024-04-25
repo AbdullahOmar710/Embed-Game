@@ -27,7 +27,7 @@ Map::Map(int width, int height) : width(width), height(height) {
     // Create a winding path by clearing a line through the trees and bushes
     int path_x = width / 2; // Start in the middle of the width
     for (int y = 0; y < height; y++) {
-        int pathWidth = 12; // The path will be 12 tiles wide
+        int pathWidth = 15; // The path will be 12 tiles wide
         for (int x_offset = -pathWidth / 2; x_offset <= pathWidth / 2; x_offset++) {
             grid[y][std::max(0, std::min(width - 1, path_x + x_offset))] = Node(PATH);
         }
@@ -62,6 +62,13 @@ bool Map::isPathBorder(int y, int x) {
     return grid[y][x].getType() != PATH && adjacentPath;
 }
 
+bool Map::isPath(int x, int y) const {
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+        return grid[y][x].getType() == PATH;
+    }
+    return false;
+}
+
 void Map::displayMap(N5110 &lcd, int centerX, int centerY) {
     int halfHeight = 24;
     int halfWidth = 42;
@@ -92,13 +99,13 @@ void Map::displayMap(N5110 &lcd, int centerX, int centerY) {
                     if (i - startRow > 0) lcd.setPixel(j - startCol, i - startRow - 1, 1); // Top pixel
                     if (i - startRow < halfHeight * 2 - 1) lcd.setPixel(j - startCol, i - startRow + 1, 1); // Bottom pixel
                     break;
-                }
             }
         }
+    }
 
-    lcd.drawRect(42, 24, 5, 5, FILL_BLACK);  // Character always in the center
-    lcd.refresh();
+    lcd.refresh(); // Refresh the display once all drawing is done
 }
+
 
 int Map::getWidth() const {
     return width;
@@ -109,17 +116,16 @@ int Map::getHeight() const {
 }
 
 int Map::getPathCenterXAt(int y) {
-    int start_x = -1;
-    int end_x = -1;
-    // Find the start and end of the path segment at row y
+    int start_x = -1, end_x = -1;
     for (int x = 0; x < width; x++) {
         if (grid[y][x].getType() == PATH) {
-            if (start_x == -1) start_x = x; // First path tile found
-            end_x = x; // Continues to assign until the last path tile
+            if (start_x == -1) start_x = x; // first path tile found
+            end_x = x; // continues to assign until the last path tile
         }
     }
     if (start_x != -1 && end_x != -1) {
-        return (start_x + end_x) / 2; // Return the middle of the path segment
+        return (start_x + end_x) / 2; // return the middle of the path segment
     }
-    return width / 2; // Fallback to the middle of the map if no path is found
+    return width / 2; // fallback to the middle of the map if no path is found
 }
+

@@ -4,9 +4,15 @@ GameEngine::GameEngine()
     : display(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10), // Initialize the LCD with pin numbers
       joystick(PC_3, PC_2), // Initialize the Joystick with pin numbers
       joystickButton(PC_15), // Initialize the joystick button
-      gameMap(200, 200), // Initialize the game map with size directly here
+      
+      gameMap(250, 250),  // Initialize the game map with size
       centerX(100), // Initial X coordinate in the middle of the map
-      centerY(100) { // Initial Y coordinate in the middle of the map
+      centerY(100), // Initial Y coordinate in the middle of the map
+      
+      character(40, 35, 7, 7), // Initialize character with position and size
+      enemy(0, 0, 0, 0) // Initialize enemy with default values (Later overwritten in GameEngine::init)
+
+{
     running = false;
     exiting = false;
 }
@@ -21,13 +27,27 @@ void GameEngine::init() {
     display.setBrightness(0.5);
 
     joystick.init();  // Initialize the joystick
-
-    gameMap = Map(200, 200); // Larger map size for exploration
-    gameMap.displayMap(display, centerX, centerY);
-
+    
     // Initialize character position at the bottom of the map, centered horizontally on the path
     centerY = gameMap.getHeight() - 2; // Start near the bottom of the map
     centerX = gameMap.getPathCenterXAt(centerY); // Get the central x-coordinate of the path at the bottom
+
+    // Set the enemy position and size
+    int enemyStartX, enemyStartY;
+    bool enemyPositionFound = false;
+
+    // Find a random position on the path for the enemy
+    while (!enemyPositionFound) {
+        enemyStartY = rand() % gameMap.getHeight();
+        enemyStartX = gameMap.getPathCenterXAt(enemyStartY);
+
+        // Check if the selected position is a valid path position
+        if (gameMap.isPath(enemyStartX, enemyStartY)) {
+            enemyPositionFound = true;
+        }
+    }
+
+    enemy = Enemy(enemyStartX, enemyStartY, 5, 5);  // Create the enemy with the desired position and size
 
     running = true;
 }
@@ -53,22 +73,29 @@ void GameEngine::handleEvents() {
     }
 }
 
-void GameEngine::update() {
-    // Update logic can be expanded as needed
-}
-
 void GameEngine::render() {
     display.clear();
-    gameMap.displayMap(display, centerX, centerY - 12); // Adjust Y to keep the path centered
-    display.refresh();
-}
+    gameMap.displayMap(display, centerX, centerY);
+    character.display(display);
 
+    // Calculate the relative position of the enemy on the screen
+    int enemyDisplayX = enemy.getX() - centerX + 42;
+    int enemyDisplayY = enemy.getY() - centerY + 24;
+
+    // Check if the enemy is within the visible range
+    if (enemyDisplayX >= 0 && enemyDisplayX <= 84 && enemyDisplayY >= 0 && enemyDisplayY <= 48) {
+        // Display the enemy on the screen
+        display.drawRect(enemyDisplayX, enemyDisplayY, enemy.getWidth(), enemy.getHeight(), FILL_BLACK);
+    }
+
+    display.refresh();
+
+}
 
 void GameEngine::run() {
     init();
     while (running) {
         handleEvents();
-        update();
         render();
         ThisThread::sleep_for(100ms); // Control refresh rate
     }
