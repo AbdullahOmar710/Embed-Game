@@ -29,29 +29,23 @@ Map::Map(int width, int height) : width(width), height(height) {
     for (int y = 0; y < height; y++) {
         int pathWidth = 12; // The path will be 12 tiles wide
         for (int x_offset = -pathWidth / 2; x_offset <= pathWidth / 2; x_offset++) {
-            grid[y][std::max(0, std::min(width - 1, path_x + x_offset))] = Node(EMPTY);
+            grid[y][std::max(0, std::min(width - 1, path_x + x_offset))] = Node(PATH);
         }
 
-    // Place rocks in a more spaced manner along the sides of the path
-    for (int x_offset = -pathWidth / 2 - 2; x_offset <= pathWidth / 2 + 2; x_offset++) {
-        if (abs(x_offset) == pathWidth / 2 + 1) { // Only place rocks directly adjacent to the path
-            // Check y to place rocks at intervals
-            if (y % 2 == 0) {  // Place a rock every 2 rows (The higher the number the more dense the path will appear)
-                int rockX = std::max(0, std::min(width - 1, path_x + x_offset));
-                grid[y][rockX] = Node(ROCK);
+        // Place rocks in a more spaced manner along the sides of the path
+        for (int x_offset = -pathWidth / 2 - 2; x_offset <= pathWidth / 2 + 2; x_offset++) {
+            if (abs(x_offset) == pathWidth / 2 + 1) { // Only place rocks directly adjacent to the path
+                if (y % 2 == 0) {  // Place a rock every 2 rows for a less dense path
+                    int rockX = std::max(0, std::min(width - 1, path_x + x_offset));
+                    grid[y][rockX] = Node(ROCK);
+                }
             }
         }
-    }
 
         // Randomly change path direction
-        if (rand() % 2 == 0) {
-            if (path_x > pathWidth / 2 + 1) {
-                path_x--; // move path left
-            }
-        } else {
-            if (path_x < width - pathWidth / 2 - 2) {
-                path_x++; // move path right
-            }
+        if (rand() % 10 < 3) {  // 30% chance to change direction
+            path_x += rand() % 3 - 1; // Shift path left or right slightly
+            path_x = std::max(pathWidth / 2, std::min(path_x, width - pathWidth / 2)); // Keep path within bounds
         }
     }
 }
@@ -112,4 +106,20 @@ int Map::getWidth() const {
 
 int Map::getHeight() const {
     return height;
+}
+
+int Map::getPathCenterXAt(int y) {
+    int start_x = -1;
+    int end_x = -1;
+    // Find the start and end of the path segment at row y
+    for (int x = 0; x < width; x++) {
+        if (grid[y][x].getType() == PATH) {
+            if (start_x == -1) start_x = x; // First path tile found
+            end_x = x; // Continues to assign until the last path tile
+        }
+    }
+    if (start_x != -1 && end_x != -1) {
+        return (start_x + end_x) / 2; // Return the middle of the path segment
+    }
+    return width / 2; // Fallback to the middle of the map if no path is found
 }
