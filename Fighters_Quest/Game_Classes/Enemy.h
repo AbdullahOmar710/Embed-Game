@@ -13,9 +13,15 @@ public:
     int getWidth() const;
     int getHeight() const;
 
+    int getHealth() const;
+    void takeDamage(int damage);
+
 private:
     int x, y;
     int width, height;
+
+    int health;
+
 };
 
-#endif // ENEMY_H
+#endif // ENEMY_H 

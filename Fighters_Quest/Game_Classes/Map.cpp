@@ -106,6 +106,15 @@ void Map::displayMap(N5110 &lcd, int centerX, int centerY) {
     lcd.refresh(); // Refresh the display once all drawing is done
 }
 
+int Map::getPathWidthAt(int y) const {
+    int pathWidth = 0;
+    for (int x = 0; x < width; x++) {
+        if (grid[y][x].getType() == PATH) {
+            pathWidth++;
+        }
+    }
+    return pathWidth;
+}
 
 int Map::getWidth() const {
     return width;

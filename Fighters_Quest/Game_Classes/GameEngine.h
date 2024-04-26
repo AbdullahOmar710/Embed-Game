@@ -7,6 +7,7 @@
 #include "Map.h"
 #include "Character.h"
 #include "Enemy.h"
+#include "CombatSystems.h"
 
 #include <vector>
 
@@ -32,7 +33,7 @@ private:
     InterruptIn joystickButton; // Joystick button for additional interaction
     Character character;        // Player's character instance
     Enemy enemy;
-
+    CombatSystem combatSystem;
 
     int centerX;  // Current X coordinate of the player
     int centerY;  // Current Y coordinate of the player
@@ -42,3 +43,4 @@ private:
 };
 
 #endif // GAME_ENGINE_H
+ 

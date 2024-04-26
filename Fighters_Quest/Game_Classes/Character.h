@@ -9,7 +9,13 @@ public:
     void display(N5110 &lcd); // Method to display the character on the LCD
     void move(int dx, int dy); // Method to move the character
     void setPosition(int x, int y); // Set character position
+    int getWidth() const;
+    int getHeight() const;
+    
+    int getHealth() const;
+    void takeDamage(int damage);
 
+    bool canLock() const;
 
     // Getters for position
     int getX() const;
@@ -18,6 +24,8 @@ public:
 private:
     int x, y; // Position of the character
     int width, height; // Width and height members
+
+    int health;
 
 };
 

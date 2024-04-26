@@ -1,7 +1,19 @@
 #include "Enemy.h"
 
 Enemy::Enemy(int x, int y, int width, int height)
-    : x(x), y(y), width(width), height(height) {}
+    : x(x), y(y), width(width), height(height), health(100) {
+}
+
+int Enemy::getHealth() const {
+    return health;
+}
+
+void Enemy::takeDamage(int damage) {
+    health -= damage;
+    if (health < 0) {
+        health = 0;
+    }
+}
 
 void Enemy::display(N5110 &lcd) {
     lcd.drawRect(x, y, width, height, FILL_BLACK);
@@ -26,4 +38,4 @@ int Enemy::getWidth() const {
 
 int Enemy::getHeight() const {
     return height;
-}
+} 

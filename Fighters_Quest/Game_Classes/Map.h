@@ -15,6 +15,7 @@ public:
     // Method to check if a position is valid
     bool isValidPosition(int x, int y);
     bool isPath(int x, int y) const;
+    int getPathWidthAt(int y) const;
 
 
 private:
