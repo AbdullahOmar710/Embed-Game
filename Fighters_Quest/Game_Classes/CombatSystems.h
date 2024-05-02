@@ -16,6 +16,9 @@ public:
     int getCombatCenterY() const;
     int getCombatRadius() const;
 
+    void handleShooting();
+
+
 private:
     Character& character;
     Enemy& enemy;

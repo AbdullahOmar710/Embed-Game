@@ -15,12 +15,14 @@ public:
 
     int getHealth() const;
     void takeDamage(int damage);
+    float getHealthBarWidth() const;
+    void decreaseHealthBarWidth(float amount);
 
 private:
     int x, y;
     int width, height;
-
     int health;
+    float healthBarWidth;
 
 };
 

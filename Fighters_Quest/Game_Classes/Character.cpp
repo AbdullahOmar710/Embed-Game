@@ -1,7 +1,7 @@
 #include "Character.h"
 
 Character::Character(int x, int y, int width, int height)
-    : x(x), y(y), width(width), height(height), health(100) {
+    : x(x), y(y), width(width), height(height), health(100), shooting(false) {  // Fixed line here
 }
 
 int Character::getHealth() const {
@@ -39,3 +39,12 @@ int Character::getWidth() const {
 int Character::getHeight() const {
     return height;
 } 
+
+void Character::shoot() {
+    shooting = true;
+    shootingTimer.start();
+}
+
+bool Character::isShooting() const {
+    return shooting;
+}

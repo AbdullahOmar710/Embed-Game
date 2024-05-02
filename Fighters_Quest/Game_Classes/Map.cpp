@@ -27,7 +27,7 @@ Map::Map(int width, int height) : width(width), height(height) {
     // Create a winding path by clearing a line through the trees and bushes
     int path_x = width / 2; // Start in the middle of the width
     for (int y = 0; y < height; y++) {
-        int pathWidth = 15; // The path will be 12 tiles wide
+        int pathWidth = 15; // The path will be 15 tiles wide
         for (int x_offset = -pathWidth / 2; x_offset <= pathWidth / 2; x_offset++) {
             grid[y][std::max(0, std::min(width - 1, path_x + x_offset))] = Node(PATH);
         }

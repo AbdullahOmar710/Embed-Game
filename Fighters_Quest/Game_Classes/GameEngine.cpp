@@ -11,7 +11,8 @@ GameEngine::GameEngine()
       
       character(40, 35, 7, 7), // Initialize character with position and size
       enemy(0, 0, 0, 0), // Initialize enemy with default values (Later overwritten in GameEngine::init)
-      combatSystem(character, enemy, 5) // Adjust the lock-on radius as needed (How close you need to get before going into combat mode)
+      combatSystem(character, enemy, 5), // Adjust the lock-on radius as needed (How close you need to get before going into combat mode)
+      shootButton(PC_0, PullUp) // Initialize the shoot button
 
 {
     running = false;
@@ -72,6 +73,11 @@ void GameEngine::handleEvents() {
             combatSystem.lock();
         }
     }
+    
+    // Check if the shoot button is pressed
+    if (shootButton.read() == 1) { // Assuming the button is active low
+        combatSystem.handleShooting();
+    }
 
     // Handle direction logic as before
     switch (dir) {
@@ -90,6 +96,11 @@ void GameEngine::handleEvents() {
 void GameEngine::render() {
     display.clear();
     gameMap.displayMap(display, centerX, centerY);
+
+    // Display a message when the character is shooting
+    if (combatSystem.isLocked() && shootButton.read() == 1) {
+        display.printString("Shooting!", 0, 0);
+    }
 
     // Display character
     character.display(display);
@@ -111,13 +122,11 @@ void GameEngine::render() {
         // Display the enemy on the screen
         display.drawRect(enemyDisplayX, enemyDisplayY, enemy.getWidth(), enemy.getHeight(), FILL_BLACK);
         // Display enemy health bar
-        int enemyHealthBarWidth = enemy.getWidth() + 4; // Increase width by 4 pixels
+        int enemyHealthBarWidth = enemy.getHealthBarWidth(); // Get the current health bar width
         int enemyHealthBarHeight = 1; // Set height to 1 pixel
         int enemyHealthBarX = enemyDisplayX - 2; // Adjust X position to center the health bar
         int enemyHealthBarY = enemyDisplayY + enemy.getHeight() + 1;
-        int enemyHealthBarFill = (enemy.getHealth() * enemyHealthBarWidth) / 100;
-        display.drawRect(enemyHealthBarX, enemyHealthBarY, enemyHealthBarWidth, enemyHealthBarHeight, FILL_TRANSPARENT);
-        display.drawRect(enemyHealthBarX, enemyHealthBarY, enemyHealthBarFill, enemyHealthBarHeight, FILL_BLACK);
+        display.drawRect(enemyHealthBarX, enemyHealthBarY, enemyHealthBarWidth, enemyHealthBarHeight, FILL_BLACK);
     }
     
     // Draw the combat circle if characters are locked in combat
@@ -137,6 +146,24 @@ void GameEngine::render() {
         }
     }
 
+    // Display the bullet or fire when the character is shooting
+    if (character.isShooting()) {
+        int bulletX = character.getX() + character.getWidth() / 2;
+        int bulletY = character.getY();
+
+        // Draw the bullet or fire
+        display.drawLine(bulletX, bulletY, bulletX, bulletY - 5, 1);
+        display.drawLine(bulletX - 1, bulletY - 5, bulletX + 1, bulletY - 5, 1);
+        display.drawLine(bulletX - 2, bulletY - 4, bulletX + 2, bulletY - 4, 1);
+
+        // Stop shooting after a certain duration (e.g., 200ms)
+        if (character.shootingTimer.read_ms() > 200) {
+            character.shooting = false;
+            character.shootingTimer.stop();
+            character.shootingTimer.reset();
+        }
+    }
+
     display.refresh();
 }
 
@@ -152,4 +179,3 @@ void GameEngine::run() {
 void GameEngine::stop() {
     running = false;
 }
- 

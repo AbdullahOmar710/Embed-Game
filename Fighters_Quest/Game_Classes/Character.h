@@ -21,11 +21,18 @@ public:
     int getX() const;
     int getY() const;
 
+    void shoot();
+    bool isShooting() const;
+
+    bool shooting;
+    Timer shootingTimer;
+
 private:
     int x, y; // Position of the character
     int width, height; // Width and height members
 
     int health;
+
 
 };
 

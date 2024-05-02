@@ -30,11 +30,15 @@ private:
     N5110 display;
     Joystick joystick;
     Map gameMap;
+   
     InterruptIn joystickButton; // Joystick button for additional interaction
+    InterruptIn shootButton;
+ 
     Character character;        // Player's character instance
     Enemy enemy;
+    
     CombatSystem combatSystem;
-
+    
     int centerX;  // Current X coordinate of the player
     int centerY;  // Current Y coordinate of the player
 

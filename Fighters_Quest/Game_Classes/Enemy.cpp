@@ -1,7 +1,7 @@
 #include "Enemy.h"
 
 Enemy::Enemy(int x, int y, int width, int height)
-    : x(x), y(y), width(width), height(height), health(100) {
+    : x(x), y(y), width(width), height(height), health(100), healthBarWidth(width + 4) {
 }
 
 int Enemy::getHealth() const {
@@ -12,6 +12,17 @@ void Enemy::takeDamage(int damage) {
     health -= damage;
     if (health < 0) {
         health = 0;
+    }
+}
+
+float Enemy::getHealthBarWidth() const {
+    return healthBarWidth;
+}
+
+void Enemy::decreaseHealthBarWidth(float amount) {
+    healthBarWidth -= amount;
+    if (healthBarWidth < 0) {
+        healthBarWidth = 0;
     }
 }
 

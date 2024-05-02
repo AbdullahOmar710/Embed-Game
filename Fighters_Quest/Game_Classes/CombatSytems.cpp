@@ -63,3 +63,17 @@ int CombatSystem::getCombatCenterY() const {
 int CombatSystem::getCombatRadius() const {
     return combatRadius;
 } 
+
+void CombatSystem::handleShooting() {
+    if (locked) {
+        int damage = 10; // Set the damage value
+        enemy.takeDamage(damage);
+        enemy.decreaseHealthBarWidth(0.8); // Decrease the health bar width by 1
+
+        // Check if the enemy's health reaches zero
+        if (enemy.getHealth() <= 0) {
+            // For now, let's set the enemy's position outside the visible range
+            enemy.setPosition(-100, -100);
+        }
+    }
+}
