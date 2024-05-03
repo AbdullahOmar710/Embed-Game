@@ -28,7 +28,7 @@ void Enemy::decreaseHealthBarWidth(float amount) {
 
 void Enemy::display(N5110 &lcd) {
     // Display the sprite using lcd.drawSprite function
-    lcd.drawSprite(x, y, 16, 16, (int *)Blazeguard);
+    lcd.drawSprite(x, y, 16, 16, (int *)Ironclad_Titan);
 }
 
 void Enemy::setPosition(int x, int y) {

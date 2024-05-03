@@ -8,9 +8,11 @@ GameEngine::GameEngine()
       joystick(PC_3, PC_2), // Initialize the Joystick with pin numbers
       joystickButton(PC_15), // Initialize the joystick button
       restartButton(PC_12),
+      buzzer(PC_9),
+
       restartUsed(false),
 
-      gameMap(150, 150),  // Initialize the game map with size
+      gameMap(225, 225),  // Initialize the game map with size
       centerX(100), // Initial X coordinate in the middle of the map
       centerY(100), // Initial Y coordinate in the middle of the map
       
@@ -23,6 +25,9 @@ GameEngine::GameEngine()
     exiting = false;
     gameTimer.start();
     restartButton.fall(callback(this, &GameEngine::restartTimer));
+   
+    playIntroSound();
+    ThisThread::sleep_for(std::chrono::milliseconds(500)); // Add a 3-second delay
 
 }
 
@@ -133,12 +138,14 @@ void GameEngine::render() {
     if (enemy.getHealth() <= 0) {
         // Display the win screen
         display.drawSprite(0, 0, 48, 84, (int *)WinScreen);
+        playWinSound();
     } else {
         // Check if the countdown has reached 0
         int remainingTime = (GAME_DURATION_MS - gameTimer.read_ms()) / 1000;
         if (remainingTime <= 0) {
             // Display the loss screen
             display.drawSprite(0, 0, 48, 84, (int *)LossScreen);
+            playLoseSound();
         } else {
             // Display the game elements only if the countdown is still running
             gameMap.displayMap(display, centerX, centerY);
@@ -206,12 +213,64 @@ void GameEngine::render() {
     display.refresh();
 }
 
+void GameEngine::playIntroSound() {
+    // Define the intro sound using note frequencies and durations
+    float introMelody[] = {
+        523.25, 587.33, 659.25, 783.99, 880.00
+    };
+    float introDuration = 0.2f;
+
+    // Play the intro sound
+    for (int i = 0; i < sizeof(introMelody) / sizeof(introMelody[0]); i++) {
+        buzzer.period(1.0 / introMelody[i]);
+        buzzer.write(0.5f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(introDuration * 1000)));
+        buzzer.write(0.0f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(introDuration * 200)));
+    }
+}
+
+void GameEngine::playLoseSound() {
+    // Define the lose sound using note frequencies and durations
+    float loseMelody[] = {
+        392.00, 349.23, 311.13, 261.63
+    };
+    float loseDuration = 0.3f;
+
+    // Play the lose sound
+    for (int i = 0; i < sizeof(loseMelody) / sizeof(loseMelody[0]); i++) {
+        buzzer.period(1.0 / loseMelody[i]);
+        buzzer.write(0.5f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(loseDuration * 1000)));
+        buzzer.write(0.0f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(loseDuration * 200)));
+    }
+}
+
+void GameEngine::playWinSound() {
+    // Define the win sound using note frequencies and durations
+    float winMelody[] = {
+        783.99, 880.00, 987.77, 1046.50
+    };
+    float winDuration = 0.2f;
+
+    // Play the win sound
+    for (int i = 0; i < sizeof(winMelody) / sizeof(winMelody[0]); i++) {
+        buzzer.period(1.0 / winMelody[i]);
+        buzzer.write(0.5f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(winDuration * 1000)));
+        buzzer.write(0.0f);
+        ThisThread::sleep_for(std::chrono::milliseconds(static_cast<int>(winDuration * 200)));
+    }
+}
+
 void GameEngine::run() {
     init();
     displayIntroScreen();
 
     while (running) {
         handleEvents();
+        update();
         render();
         ThisThread::sleep_for(100ms); // Control refresh rate
     }

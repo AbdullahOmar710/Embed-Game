@@ -28,6 +28,12 @@ public:
     void run();
     void stop();
 
+    void playAdventureTheme();
+
+    void playIntroSound();
+    void playLoseSound();
+    void playWinSound();
+
 private:
     N5110 display;
     Joystick joystick;
@@ -53,6 +59,9 @@ private:
     InterruptIn restartButton;
     bool restartUsed;
     void restartTimer();
+
+    PwmOut buzzer;
+
 };
 
 #endif // GAME_ENGINE_H

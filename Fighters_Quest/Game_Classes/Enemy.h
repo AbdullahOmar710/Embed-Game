@@ -3,6 +3,8 @@
 
 #include "N5110.h"
 #include "Blazeguard.h"
+#include "Shadowstrike.h"
+#include "Ironclad_Titan.h"
 
 class Enemy {
 public:
