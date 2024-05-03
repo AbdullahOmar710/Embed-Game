@@ -40,7 +40,7 @@ void CombatSystem::lock() {
     int dy = (character.getY() + character.getHeight() / 2) - combatCenterY;
 
     // Calculate the radius of the combat circle
-    combatRadius = std::sqrt(dx * dx + dy * dy) + 10; // Adjust the radius as needed by changing the number at the end 
+    combatRadius = std::sqrt(dx * dx + dy * dy) + 15; // Adjust the radius as needed by changing the number at the end 
 
     // Optionally adjust the radius to align exactly at the edge of the enemy
     combatRadius -= std::min(enemy.getWidth(), enemy.getHeight()) / 2;

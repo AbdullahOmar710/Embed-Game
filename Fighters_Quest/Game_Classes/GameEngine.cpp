@@ -1,11 +1,15 @@
 #include "GameEngine.h"
 #include <cstdio>
+#include "LossScreen.h"
+#include "WinScreen.h"
 
 GameEngine::GameEngine() 
     : display(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10), // Initialize the LCD with pin numbers
       joystick(PC_3, PC_2), // Initialize the Joystick with pin numbers
       joystickButton(PC_15), // Initialize the joystick button
-      
+      restartButton(PC_12),
+      restartUsed(false),
+
       gameMap(150, 150),  // Initialize the game map with size
       centerX(100), // Initial X coordinate in the middle of the map
       centerY(100), // Initial Y coordinate in the middle of the map
@@ -17,6 +21,9 @@ GameEngine::GameEngine()
 {
     running = false;
     exiting = false;
+    gameTimer.start();
+    restartButton.fall(callback(this, &GameEngine::restartTimer));
+
 }
 
 GameEngine::~GameEngine() {
@@ -34,6 +41,13 @@ void GameEngine::displayIntroScreen() {
     }
     display.refresh();
     ThisThread::sleep_for(10s); // Display the introscreen for 10 seconds
+}
+
+void GameEngine::restartTimer() {
+    if (!restartUsed) {
+        gameTimer.reset();
+        restartUsed = true;
+    }
 }
 
 void GameEngine::init() {
@@ -75,6 +89,12 @@ void GameEngine::cleanup() {
 
 void GameEngine::update() {
     combatSystem.update();
+
+    // Check if the game duration has elapsed
+    if (gameTimer.read_ms() >= GAME_DURATION_MS && !restartUsed) {
+        // Set the character's position outside the visible range to make them disappear
+        character.setPosition(-100, -100);
+    }
 }
 
 void GameEngine::handleEvents() {
@@ -108,55 +128,71 @@ void GameEngine::handleEvents() {
 
 void GameEngine::render() {
     display.clear();
-    gameMap.displayMap(display, centerX, centerY);
 
-    // Display a message when the character is shooting
-    if (combatSystem.isLocked() && shootButton.read() == 1) {
-        display.printString("Shooting!", 0, 0);
-    }
+    // Check if the enemy's health is 0
+    if (enemy.getHealth() <= 0) {
+        // Display the win screen
+        display.drawSprite(0, 0, 48, 84, (int *)WinScreen);
+    } else {
+        // Check if the countdown has reached 0
+        int remainingTime = (GAME_DURATION_MS - gameTimer.read_ms()) / 1000;
+        if (remainingTime <= 0) {
+            // Display the loss screen
+            display.drawSprite(0, 0, 48, 84, (int *)LossScreen);
+        } else {
+            // Display the game elements only if the countdown is still running
+            gameMap.displayMap(display, centerX, centerY);
 
-    // Display character
-    character.display(display);
-    // Display character health bar
-    int characterHealthBarWidth = character.getWidth() + 2; // Increase width by 4 pixels
-    int characterHealthBarHeight = 1; // Set height to 1 pixel
-    int characterHealthBarX = character.getX() - 1; // Adjust X position to center the health bar
-    int characterHealthBarY = character.getY() + character.getHeight() + 2;
-    int characterHealthBarFill = (character.getHealth() * characterHealthBarWidth) / 100;
-    display.drawRect(characterHealthBarX, characterHealthBarY, characterHealthBarWidth, characterHealthBarHeight, FILL_TRANSPARENT);
-    display.drawRect(characterHealthBarX, characterHealthBarY, characterHealthBarFill, characterHealthBarHeight, FILL_BLACK);
+            // Display a message when the character is shooting
+            if (combatSystem.isLocked() && shootButton.read() == 1) {
+                display.printString("Shooting!", 0, 0);
+            }
 
-    // Calculate the relative position of the enemy on the screen
-    int enemyDisplayX = enemy.getX() - centerX + 42;
-    int enemyDisplayY = enemy.getY() - centerY + 24;
+            // Display character only if the game is not over
+            if (gameTimer.read_ms() < GAME_DURATION_MS) {
+                character.display(display);
+            }
 
-    // Check if the enemy is within the visible range
-    if (enemyDisplayX >= 0 && enemyDisplayX <= 84 && enemyDisplayY >= 0 && enemyDisplayY <= 48) {
-        // Display the enemy sprite on the screen
-        display.drawSprite(enemyDisplayX, enemyDisplayY, 16, 16, (int *)Blazeguard);
-        
-        // Display enemy health bar
-        int enemyHealthBarWidth = enemy.getHealthBarWidth(); // Get the current health bar width
-        int enemyHealthBarHeight = 1; // Set height to 1 pixel
-        int enemyHealthBarX = enemyDisplayX - 2; // Adjust X position to center the health bar
-        int enemyHealthBarY = enemyDisplayY + enemy.getHeight() + 1;
-        display.drawRect(enemyHealthBarX, enemyHealthBarY, enemyHealthBarWidth, enemyHealthBarHeight, FILL_BLACK);
-    }
-    
-    // Draw the combat circle if characters are locked in combat
-    if (combatSystem.isLocked()) {
-        int combatCenterX = combatSystem.getCombatCenterX();
-        int combatCenterY = combatSystem.getCombatCenterY();
-        int combatRadius = combatSystem.getCombatRadius();
+            // Calculate the relative position of the enemy on the screen
+            int enemyDisplayX = enemy.getX() - centerX + 42;
+            int enemyDisplayY = enemy.getY() - centerY + 24;
 
-        // Calculate the relative position of the combat circle on the screen
-        int combatCircleX = combatCenterX - centerX + 42;
-        int combatCircleY = combatCenterY - centerY + 24;
+            // Check if the enemy is within the visible range
+            if (enemyDisplayX >= 0 && enemyDisplayX <= 84 && enemyDisplayY >= 0 && enemyDisplayY <= 48) {
+                // Display the enemy sprite on the screen
+                display.drawSprite(enemyDisplayX, enemyDisplayY, 16, 16, (int *)Blazeguard);
+                
+                // Display enemy health bar
+                int enemyHealthBarWidth = enemy.getHealthBarWidth(); // Get the current health bar width
+                int enemyHealthBarHeight = 1; // Set height to 1 pixel
+                int enemyHealthBarX = enemyDisplayX - 2; // Adjust X position to center the health bar
+                int enemyHealthBarY = enemyDisplayY + enemy.getHeight() + 1;
+                display.drawRect(enemyHealthBarX, enemyHealthBarY, enemyHealthBarWidth, enemyHealthBarHeight, FILL_BLACK);
+            }
+            
+            // Draw the combat circle if characters are locked in combat
+            if (combatSystem.isLocked()) {
+                int combatCenterX = combatSystem.getCombatCenterX();
+                int combatCenterY = combatSystem.getCombatCenterY();
+                int combatRadius = combatSystem.getCombatRadius();
 
-        // Check if the combat circle is within the visible range
-        if (combatCircleX >= 0 && combatCircleX <= 84 && combatCircleY >= 0 && combatCircleY <= 48) {
-            // Draw the combat circle
-            display.drawCircle(combatCircleX, combatCircleY, combatRadius, FILL_TRANSPARENT);
+                // Calculate the relative position of the combat circle on the screen
+                int combatCircleX = combatCenterX - centerX + 42;
+                int combatCircleY = combatCenterY - centerY + 24;
+
+                // Check if the combat circle is within the visible range
+                if (combatCircleX >= 0 && combatCircleX <= 84 && combatCircleY >= 0 && combatCircleY <= 48) {
+                    // Draw the combat circle
+                    display.drawCircle(combatCircleX, combatCircleY, combatRadius, FILL_TRANSPARENT);
+                }
+            }
+            
+            // Display the countdown on the top right of the LCD
+            if (remainingTime >= 0) {
+                char countdownStr[10];
+                snprintf(countdownStr, sizeof(countdownStr), "%d", remainingTime);
+                display.printString(countdownStr, 70, 0);
+            }
         }
     }
 

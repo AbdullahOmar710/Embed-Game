@@ -1,7 +1,8 @@
 #include "Character.h"
 
 Character::Character(int x, int y, int width, int height)
-    : x(x), y(y), width(width), height(height), health(100), shooting(false) {  // Fixed line here
+    : x(x), y(y), width(width), height(height), health(100), shooting(false) {
+    healthLossTimer.start();
 }
 
 int Character::getHealth() const {
@@ -47,4 +48,9 @@ void Character::shoot() {
 
 bool Character::isShooting() const {
     return shooting;
+}
+
+void Character::setPosition(int x, int y) {
+    this->x = x;
+    this->y = y;
 }

@@ -46,6 +46,13 @@ private:
 
     bool running; // Flag to check if the game loop should continue
     bool exiting; // Flag to check if the game should exit
+
+    Timer gameTimer;
+    static const int GAME_DURATION_MS = 40000; // Time it takes for the timer to get to 0
+
+    InterruptIn restartButton;
+    bool restartUsed;
+    void restartTimer();
 };
 
 #endif // GAME_ENGINE_H

@@ -27,13 +27,13 @@ public:
 
     bool shooting;
     Timer shootingTimer;
+    Timer healthLossTimer;
 
 private:
     int x, y; // Position of the character
     int width, height; // Width and height members
 
     int health;
-
 
 };
 
