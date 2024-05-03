@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+#include <cstdio>
 
 GameEngine::GameEngine() 
     : display(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10), // Initialize the LCD with pin numbers
@@ -13,7 +14,6 @@ GameEngine::GameEngine()
       enemy(0, 0, 16, 16), // Initialize enemy with default position and size
       combatSystem(character, enemy, 7), // Adjust the lock-on radius as needed (How close you need to get before going into combat mode)
       shootButton(PC_0, PullUp) // Initialize the shoot button
-
 {
     running = false;
     exiting = false;
@@ -21,6 +21,19 @@ GameEngine::GameEngine()
 
 GameEngine::~GameEngine() {
     cleanup();
+}
+
+void GameEngine::displayIntroScreen() {
+    display.clear();
+    for (int y = 0; y < 48; y++) {
+        for (int x = 0; x < 84; x++) {
+            if (IntroScreen[y][x] == 1) {
+                display.setPixel(x, y, FILL_BLACK);
+            }
+        }
+    }
+    display.refresh();
+    ThisThread::sleep_for(10s); // Display the introscreen for 10 seconds
 }
 
 void GameEngine::init() {
@@ -147,18 +160,20 @@ void GameEngine::render() {
         }
     }
 
-        // Stop shooting after a certain duration (e.g., 200ms)
-        if (character.shootingTimer.read_ms() > 200) {
-            character.shooting = false;
-            character.shootingTimer.stop();
-            character.shootingTimer.reset();
-        }
+    // Stop shooting after a certain duration (e.g., 200ms)
+    if (character.shootingTimer.read_ms() > 200) {
+        character.shooting = false;
+        character.shootingTimer.stop();
+        character.shootingTimer.reset();
+    }
 
     display.refresh();
 }
 
 void GameEngine::run() {
     init();
+    displayIntroScreen();
+
     while (running) {
         handleEvents();
         render();

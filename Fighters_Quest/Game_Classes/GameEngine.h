@@ -8,6 +8,7 @@
 #include "Character.h"
 #include "Enemy.h"
 #include "CombatSystems.h"
+#include "IntroScreen.h"
 
 #include <vector>
 
@@ -22,6 +23,7 @@ public:
     void handleEvents();
     void update();
     void render();
+    void displayIntroScreen();
 
     void run();
     void stop();
