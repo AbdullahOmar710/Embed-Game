@@ -5,13 +5,13 @@ GameEngine::GameEngine()
       joystick(PC_3, PC_2), // Initialize the Joystick with pin numbers
       joystickButton(PC_15), // Initialize the joystick button
       
-      gameMap(120, 120),  // Initialize the game map with size
+      gameMap(150, 150),  // Initialize the game map with size
       centerX(100), // Initial X coordinate in the middle of the map
       centerY(100), // Initial Y coordinate in the middle of the map
       
-      character(40, 35, 7, 7), // Initialize character with position and size
-      enemy(0, 0, 0, 0), // Initialize enemy with default values (Later overwritten in GameEngine::init)
-      combatSystem(character, enemy, 5), // Adjust the lock-on radius as needed (How close you need to get before going into combat mode)
+      character(41, 25, 20, 19), // Initialize character with position and size
+      enemy(0, 0, 16, 16), // Initialize enemy with default position and size
+      combatSystem(character, enemy, 7), // Adjust the lock-on radius as needed (How close you need to get before going into combat mode)
       shootButton(PC_0, PullUp) // Initialize the shoot button
 
 {
@@ -30,9 +30,9 @@ void GameEngine::init() {
 
     joystick.init();  // Initialize the joystick
     
-    // Initialize character position at the bottom of the map, centered horizontally on the path
-    centerY = gameMap.getHeight() - 2; // Start near the bottom of the map
-    centerX = gameMap.getPathCenterXAt(centerY); // Get the central x-coordinate of the path at the bottom
+    // Initialize character position at the bottom of the map, centered horizontally on the path, based on the sprite size
+    centerY = gameMap.getHeight() - 1; // Start near the bottom of the map
+    centerX = gameMap.getPathCenterXAt(centerY) - 10; // Get the central x-coordinate of the path at the bottom
 
     // Set the enemy position and size
     int enemyStartX, enemyStartY;
@@ -46,12 +46,12 @@ void GameEngine::init() {
         // Check if there is a valid path at the current Y-coordinate
         if (pathWidth > 0) {
             int pathCenter = gameMap.getPathCenterXAt(enemyStartY);
-            enemyStartX = pathCenter - enemy.getWidth() / 2; // Center the enemy horizontally on the path
+            enemyStartX = pathCenter - 8; // Center the enemy horizontally on the path (assuming sprite width is 16)
             enemyPositionFound = true;
         }
     }
 
-    enemy = Enemy(enemyStartX, enemyStartY, 5, 5);  // Create the enemy with the desired position and size
+    enemy = Enemy(enemyStartX, enemyStartY, 16, 16);  // Create the enemy with the desired position and sprite size
 
     running = true;
 }
@@ -108,7 +108,7 @@ void GameEngine::render() {
     int characterHealthBarWidth = character.getWidth() + 2; // Increase width by 4 pixels
     int characterHealthBarHeight = 1; // Set height to 1 pixel
     int characterHealthBarX = character.getX() - 1; // Adjust X position to center the health bar
-    int characterHealthBarY = character.getY() + character.getHeight() + 1;
+    int characterHealthBarY = character.getY() + character.getHeight() + 2;
     int characterHealthBarFill = (character.getHealth() * characterHealthBarWidth) / 100;
     display.drawRect(characterHealthBarX, characterHealthBarY, characterHealthBarWidth, characterHealthBarHeight, FILL_TRANSPARENT);
     display.drawRect(characterHealthBarX, characterHealthBarY, characterHealthBarFill, characterHealthBarHeight, FILL_BLACK);
@@ -119,8 +119,9 @@ void GameEngine::render() {
 
     // Check if the enemy is within the visible range
     if (enemyDisplayX >= 0 && enemyDisplayX <= 84 && enemyDisplayY >= 0 && enemyDisplayY <= 48) {
-        // Display the enemy on the screen
-        display.drawRect(enemyDisplayX, enemyDisplayY, enemy.getWidth(), enemy.getHeight(), FILL_BLACK);
+        // Display the enemy sprite on the screen
+        display.drawSprite(enemyDisplayX, enemyDisplayY, 16, 16, (int *)Blazeguard);
+        
         // Display enemy health bar
         int enemyHealthBarWidth = enemy.getHealthBarWidth(); // Get the current health bar width
         int enemyHealthBarHeight = 1; // Set height to 1 pixel
@@ -146,23 +147,12 @@ void GameEngine::render() {
         }
     }
 
-    // Display the bullet or fire when the character is shooting
-    if (character.isShooting()) {
-        int bulletX = character.getX() + character.getWidth() / 2;
-        int bulletY = character.getY();
-
-        // Draw the bullet or fire
-        display.drawLine(bulletX, bulletY, bulletX, bulletY - 5, 1);
-        display.drawLine(bulletX - 1, bulletY - 5, bulletX + 1, bulletY - 5, 1);
-        display.drawLine(bulletX - 2, bulletY - 4, bulletX + 2, bulletY - 4, 1);
-
         // Stop shooting after a certain duration (e.g., 200ms)
         if (character.shootingTimer.read_ms() > 200) {
             character.shooting = false;
             character.shootingTimer.stop();
             character.shootingTimer.reset();
         }
-    }
 
     display.refresh();
 }

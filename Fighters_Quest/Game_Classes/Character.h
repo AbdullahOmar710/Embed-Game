@@ -2,6 +2,7 @@
 #define CHARACTER_H
 
 #include "N5110.h"
+#include "Toria.h"
 
 class Character {
 public:

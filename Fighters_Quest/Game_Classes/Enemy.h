@@ -2,6 +2,7 @@
 #define ENEMY_H
 
 #include "N5110.h"
+#include "Blazeguard.h"
 
 class Enemy {
 public:

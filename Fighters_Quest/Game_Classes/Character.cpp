@@ -16,7 +16,7 @@ void Character::takeDamage(int damage) {
 }
 
 void Character::display(N5110 &lcd) {
-    lcd.drawRect(x, y, width, height, FILL_BLACK); // Check the fill parameter and dimensions
+    lcd.drawSprite(x, y, 20, 19, (int *)Toria);
 }
 
 void Character::move(int dx, int dy) {

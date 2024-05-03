@@ -31,21 +31,21 @@ bool CombatSystem::isLocked() const {
 void CombatSystem::lock() {
     locked = true;
 
-    // Calculate the bounding box that encloses both the character and the enemy
-    int minX = std::min(character.getX(), enemy.getX());
-    int maxX = std::max(character.getX() + character.getWidth(), enemy.getX() + enemy.getWidth());
-    int minY = std::min(character.getY(), enemy.getY());
-    int maxY = std::max(character.getY() + character.getHeight(), enemy.getY() + enemy.getHeight());
+    // Set the center of the combat circle to the enemy's position
+    combatCenterX = enemy.getX() + enemy.getWidth() / 2;
+    combatCenterY = enemy.getY() + enemy.getHeight() / 2;
 
-    // Calculate the center of the bounding box
-    combatCenterX = (minX + maxX) / 2;
-    combatCenterY = (minY + maxY) / 2;
+    // Calculate the distance from the character to the center of the enemy
+    int dx = (character.getX() + character.getWidth() / 2) - combatCenterX;
+    int dy = (character.getY() + character.getHeight() / 2) - combatCenterY;
 
     // Calculate the radius of the combat circle
-    int dx = maxX - minX;
-    int dy = maxY - minY;
-    combatRadius = std::sqrt(dx * dx + dy * dy) / 2 + 20; // Adjust the radius as needed
+    combatRadius = std::sqrt(dx * dx + dy * dy) + 10; // Adjust the radius as needed by changing the number at the end 
+
+    // Optionally adjust the radius to align exactly at the edge of the enemy
+    combatRadius -= std::min(enemy.getWidth(), enemy.getHeight()) / 2;
 }
+
 
 void CombatSystem::unlock() {
     locked = false;
@@ -68,7 +68,7 @@ void CombatSystem::handleShooting() {
     if (locked) {
         int damage = 10; // Set the damage value
         enemy.takeDamage(damage);
-        enemy.decreaseHealthBarWidth(0.8); // Decrease the health bar width by 1
+        enemy.decreaseHealthBarWidth(2); // Decrease the health bar width by 1
 
         // Check if the enemy's health reaches zero
         if (enemy.getHealth() <= 0) {
